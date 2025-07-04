@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fluxo-database
+    restart: always
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: Europe/Moscow
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    networks:
+      - fluxo-network
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: fluxo-backend
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      ENVIRONMENT: development
+
+    volumes:
+      - ./app:/app
+
+    restart: always
+
+    networks:
+      - fluxo-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+
+networks:
+  fluxo-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
