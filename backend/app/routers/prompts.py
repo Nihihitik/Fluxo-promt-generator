@@ -68,7 +68,7 @@ async def create_prompt(
             )
     
     # Генерируем промпт
-    generated_prompt = generate_prompt(request.original_prompt, request.style_id)
+    generated_prompt = await generate_prompt(request.original_prompt, request.style_id)
     
     # Создаем запись о запросе
     prompt_request = PromptRequest(

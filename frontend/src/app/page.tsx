@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Moon, Sun, User, Send } from "lucide-react";
+import { User, Send } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -10,14 +12,12 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">Fluxo</h1>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon">
-              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Переключить тему</span>
-            </Button>
-            <Button variant="outline" size="sm">
-              <User className="h-4 w-4 mr-2" />
-              Войти
+            <ThemeToggle />
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/auth">
+                <User className="h-4 w-4 mr-2" />
+                Войти
+              </Link>
             </Button>
           </div>
         </div>
