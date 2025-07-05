@@ -4,10 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 # Конфигурация базы данных
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://user:password@localhost:5432/fluxo"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Создание движка базы данных
 engine = create_engine(DATABASE_URL)

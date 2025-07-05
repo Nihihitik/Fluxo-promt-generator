@@ -39,3 +39,5 @@ psycopg2-binary==2.9.9
 alembic==1.14.0
 bcrypt==4.2.1
 passlib==1.7.4
+# Зависимости для аутентификации
+python-jose[cryptography]==3.3.0
