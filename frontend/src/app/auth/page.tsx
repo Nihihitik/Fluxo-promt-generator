@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiClient } from "@/lib/api";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/context/auth-context";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -32,6 +33,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();
   const router = useRouter();
 
   const loginForm = useForm<LoginFormData>({
@@ -57,7 +59,8 @@ export default function AuthPage() {
 
     try {
       const response = await apiClient.login(data);
-      localStorage.setItem("token", response.access_token);
+      // Use the login function from context instead of directly setting localStorage
+      await login(response.access_token);
       router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Произошла ошибка при входе");

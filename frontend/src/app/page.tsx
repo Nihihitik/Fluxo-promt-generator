@@ -1,11 +1,17 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Send } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserProfile } from "@/components/user-profile";
+import { useAuth } from "@/context/auth-context";
 import Link from "next/link";
 
 export default function Home() {
+  const { user, loading } = useAuth();
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
@@ -13,12 +19,18 @@ export default function Home() {
           <h1 className="text-2xl font-bold text-foreground">Fluxo</h1>
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/auth">
-                <User className="h-4 w-4 mr-2" />
-                Войти
-              </Link>
-            </Button>
+            {loading ? (
+              <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+            ) : user ? (
+              <UserProfile />
+            ) : (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/auth">
+                  <User className="h-4 w-4 mr-2" />
+                  Войти
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </header>
