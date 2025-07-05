@@ -5,8 +5,8 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from app.models.user import User
-from app.schemas.user import UserCreate
+from models.user import User
+from schemas.user import UserCreate
 
 # Конфигурация для хеширования паролей
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

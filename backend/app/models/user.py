@@ -21,5 +21,5 @@ class User(Base):
     prompt_requests = relationship("PromptRequest", back_populates="user")
 
     __table_args__ = (
-        CheckConstraint("email ~ '^[^@]+@[^@]+\.[^@]+$'", name='email_format'),
+        CheckConstraint(r"email ~ '^[^@]+@[^@]+\.[^@]+$'", name='email_format'),
     )

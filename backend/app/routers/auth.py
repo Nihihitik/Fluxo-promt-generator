@@ -2,8 +2,8 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.core.auth import (
+from core.database import get_db
+from core.auth import (
     authenticate_user,
     create_user,
     create_access_token,
@@ -11,7 +11,7 @@ from app.core.auth import (
     get_user_by_email,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
-from app.schemas.user import UserCreate, UserLogin, UserResponse, Token, EmailConfirmation
+from schemas.user import UserCreate, UserLogin, UserResponse, Token, EmailConfirmation
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()

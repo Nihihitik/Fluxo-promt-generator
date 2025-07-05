@@ -25,5 +25,5 @@ def get_db():
 
 # Функция для создания таблиц
 def create_tables():
-    from app.models import Base
+    from models import Base
     Base.metadata.create_all(bind=engine)
