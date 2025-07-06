@@ -43,3 +43,10 @@ def create_tables():
     
     Base.metadata.create_all(bind=engine)
     print("✅ Все таблицы успешно созданы!")
+    
+    # Инициализируем начальные данные
+    from core.seed_data import seed_initial_data
+    try:
+        seed_initial_data()
+    except Exception as e:
+        print(f"⚠️ Предупреждение при инициализации данных: {e}")

@@ -13,6 +13,11 @@ async def startup_event():
     try:
         create_tables()
         print("✅ Инициализация базы данных завершена успешно!")
+        
+        # Дополнительная проверка и инициализация данных
+        from core.seed_data import seed_initial_data
+        seed_initial_data()
+        
     except Exception as e:
         print(f"❌ Ошибка инициализации базы данных: {e}")
         # Не останавливаем приложение, чтобы можно было диагностировать проблемы

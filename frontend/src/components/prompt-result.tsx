@@ -4,14 +4,16 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Copy, 
-  Check, 
-  Loader2, 
+import {
+  Copy,
+  Check,
+  Loader2,
   Sparkles,
   AlertCircle,
   RefreshCw
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface PromptResultProps {
   result: string | null;
@@ -25,10 +27,10 @@ interface PromptResultProps {
   };
 }
 
-export function PromptResult({ 
-  result, 
-  isLoading, 
-  error, 
+export function PromptResult({
+  result,
+  isLoading,
+  error,
   onRetry,
   originalPrompt,
   selectedStyle
@@ -37,7 +39,7 @@ export function PromptResult({
 
   const handleCopy = async () => {
     if (!result) return;
-    
+
     try {
       await navigator.clipboard.writeText(result);
       setCopied(true);
@@ -74,7 +76,7 @@ export function PromptResult({
           </CardDescription>
         )}
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {isLoading && (
           <div className="flex items-center justify-center py-8">
@@ -98,9 +100,9 @@ export function PromptResult({
                 {error}
               </p>
               {onRetry && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={onRetry}
                   className="mt-3"
                 >
@@ -115,21 +117,21 @@ export function PromptResult({
         {result && !isLoading && (
           <>
             <div className="relative">
-              <div className="p-4 bg-muted/30 rounded-lg border-l-4 border-primary">
-                <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
+              <div className="p-4 bg-card rounded-lg border shadow-sm prose dark:prose-invert max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {result}
-                </pre>
+                </ReactMarkdown>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between pt-2">
               <p className="text-xs text-muted-foreground">
                 Сгенерировано с помощью ИИ • {new Date().toLocaleTimeString('ru-RU')}
               </p>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
+
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleCopy}
                 className="gap-2"
               >
