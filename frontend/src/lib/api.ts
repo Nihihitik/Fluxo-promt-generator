@@ -86,7 +86,32 @@ class ApiClient {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        
+        // Специальная обработка 422 ошибок валидации
+        if (response.status === 422) {
+          console.error('🔍 Validation error (422) - полная информация:', {
+            status: response.status,
+            url: response.url,
+            errorData: errorData,
+            requestBody: options.body
+          });
+          
+          if (errorData.detail && Array.isArray(errorData.detail)) {
+            console.error('📋 Детали валидации:', errorData.detail);
+            const validationErrors = errorData.detail.map((err: any) => 
+              `${err.loc?.join('.') || 'field'}: ${err.msg}`
+            ).join(', ');
+            throw new Error(`Ошибка валидации: ${validationErrors}`);
+          } else if (errorData.detail) {
+            console.error('📋 Детали ошибки:', errorData.detail);
+            throw new Error(`Ошибка валидации: ${errorData.detail}`);
+          } else {
+            console.error('📋 Неизвестная ошибка валидации:', errorData);
+            throw new Error(`Ошибка валидации: ${JSON.stringify(errorData)}`);
+          }
+        }
+        
+        throw new Error(errorData.message || errorData.detail || `HTTP error! status: ${response.status}`);
       }
 
       return await response.json();
@@ -146,18 +171,31 @@ class ApiClient {
 
   async createPrompt(
     originalPrompt: string,
-    styleId: number,
+    styleId: number | null,
     token: string
   ): Promise<any> {
+    const requestData = {
+      original_prompt: originalPrompt,
+      style_id: styleId,
+    };
+
+    console.log('🚀 Отправляем запрос на создание промпта:', {
+      endpoint: '/prompts/create',
+      method: 'POST',
+      data: requestData,
+      token: token ? `${token.substring(0, 10)}...` : 'отсутствует',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? 'Bearer ***' : 'отсутствует'
+      }
+    });
+
     return this.request('/prompts/create', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        original_prompt: originalPrompt,
-        style_id: styleId,
-      }),
+      body: JSON.stringify(requestData),
     });
   }
 

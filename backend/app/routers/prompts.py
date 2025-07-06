@@ -1,7 +1,8 @@
 from datetime import date
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
+from pydantic import ValidationError
 from core.database import get_db
 from core.prompt_generator import generate_prompt, get_available_styles
 from routers.auth import get_current_user
@@ -38,11 +39,44 @@ def increment_user_requests(db: Session, user: User):
 
 @router.post("/create", response_model=PromptRequestResponse)
 async def create_prompt(
-    request: PromptRequestCreate,
+    raw_request: Request,
     current_user: UserResponse = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Создание нового промпта"""
+    print(f"🎯 Получен запрос на создание промпта:")
+    print(f"  - Content-Type: {raw_request.headers.get('content-type', 'не указан')}")
+    print(f"  - Method: {raw_request.method}")
+    print(f"  - URL: {raw_request.url}")
+    print(f"  - User-Agent: {raw_request.headers.get('user-agent', 'не указан')[:100]}...")
+    
+    # Читаем JSON данные только один раз
+    try:
+        request_data = await raw_request.json()
+        print(f"  - JSON данные: {request_data}")
+        print(f"  - Тип JSON: {type(request_data)}")
+        
+        # Создаем Pydantic модель
+        request = PromptRequestCreate(**request_data)
+        print(f"  - Успешно создана Pydantic модель: {request}")
+        
+    except ValidationError as e:
+        print(f"  - Ошибка валидации Pydantic: {e}")
+        print(f"  - Детали ошибки: {e.errors()}")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Ошибка валидации: {e.errors()}"
+        )
+    except Exception as e:
+        print(f"  - Общая ошибка создания модели: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Ошибка обработки запроса: {str(e)}"
+        )
+    
+    print(f"  - Пользователь: {current_user.email}")
+    print(f"  - Промпт: {request.original_prompt}")
+    print(f"  - Стиль: {request.style_id}")
     # Получаем полного пользователя из БД
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
