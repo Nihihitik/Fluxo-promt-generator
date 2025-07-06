@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,14 +11,16 @@ import { UserAvatar } from "@/components/user-avatar";
 import { useAuth } from "@/context/auth-context";
 import { ArrowLeft, LogOut, Lock } from "lucide-react";
 import Link from "next/link";
+import { PasswordChangeDialog } from "@/components/password-change-dialog";
 
 export default function ProfilePage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/auth");
+      router.push("/login");
     }
   }, [user, loading, router]);
 
@@ -156,9 +158,13 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button variant="outline" className="w-full" disabled>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => setShowPasswordDialog(true)}
+              >
                 <Lock className="mr-2 h-4 w-4" />
-                Сменить пароль (в разработке)
+                Сменить пароль
               </Button>
               <Button 
                 variant="destructive" 
@@ -172,6 +178,11 @@ export default function ProfilePage() {
           </Card>
         </div>
       </main>
+
+      <PasswordChangeDialog
+        open={showPasswordDialog}
+        onOpenChange={setShowPasswordDialog}
+      />
     </div>
   );
 }

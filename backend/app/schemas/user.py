@@ -47,4 +47,22 @@ class TokenData(BaseModel):
 
 class EmailConfirmation(BaseModel):
     email: EmailStr
-    code: str
+    code: str = Field(..., min_length=6, max_length=6)
+
+
+class EmailConfirmationRequest(BaseModel):
+    email: EmailStr
+
+
+class EmailConfirmationResponse(BaseModel):
+    message: str
+    email_confirmed: bool = False
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=8)
+
+
+class PasswordChangeResponse(BaseModel):
+    message: str

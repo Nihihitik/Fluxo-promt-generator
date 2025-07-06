@@ -25,7 +25,7 @@ export default function Home() {
               <UserProfile />
             ) : (
               <Button variant="outline" size="sm" asChild>
-                <Link href="/auth">
+                <Link href="/login">
                   <User className="h-4 w-4 mr-2" />
                   Войти
                 </Link>

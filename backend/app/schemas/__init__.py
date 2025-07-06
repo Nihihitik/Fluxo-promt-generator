@@ -1,6 +1,16 @@
-from .user import UserBase, UserCreate, UserUpdate, UserResponse, UserLogin, Token, TokenData, EmailConfirmation
+from .user import UserBase, UserCreate, UserUpdate, UserResponse, UserLogin, Token, TokenData, EmailConfirmation, EmailConfirmationRequest, EmailConfirmationResponse, PasswordChange, PasswordChangeResponse
 from .prompt_request import PromptRequestBase, PromptRequestCreate, PromptRequestUpdate, PromptRequestResponse
 from .prompt_style import PromptStyleBase, PromptStyleCreate, PromptStyleUpdate, PromptStyleResponse
+from .email_verification import (
+    EmailVerificationCodeBase,
+    EmailVerificationCodeCreate,
+    EmailVerificationCodeUpdate,
+    EmailVerificationCodeResponse,
+    EmailVerificationRequest,
+    EmailVerificationResponse,
+    ResendVerificationRequest,
+    ResendVerificationResponse
+)
 
 __all__ = [
     "UserBase",
@@ -11,6 +21,10 @@ __all__ = [
     "Token",
     "TokenData",
     "EmailConfirmation",
+    "EmailConfirmationRequest",
+    "EmailConfirmationResponse",
+    "PasswordChange",
+    "PasswordChangeResponse",
     "PromptRequestBase",
     "PromptRequestCreate",
     "PromptRequestUpdate", 
@@ -18,5 +32,13 @@ __all__ = [
     "PromptStyleBase",
     "PromptStyleCreate",
     "PromptStyleUpdate",
-    "PromptStyleResponse"
+    "PromptStyleResponse",
+    "EmailVerificationCodeBase",
+    "EmailVerificationCodeCreate",
+    "EmailVerificationCodeUpdate",
+    "EmailVerificationCodeResponse",
+    "EmailVerificationRequest",
+    "EmailVerificationResponse",
+    "ResendVerificationRequest",
+    "ResendVerificationResponse"
 ]

@@ -9,20 +9,37 @@ from core.auth import (
     create_access_token,
     verify_token,
     get_user_by_email,
+    change_user_password,
+    send_verification_code,
+    verify_email_code,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
-from schemas.user import UserCreate, UserLogin, UserResponse, Token, EmailConfirmation
+from schemas.user import UserCreate, UserLogin, UserResponse, Token, EmailConfirmation, EmailConfirmationRequest, EmailConfirmationResponse, PasswordChange, PasswordChangeResponse
+from models.user import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
 
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register", response_model=EmailConfirmationResponse)
 async def register(user: UserCreate, db: Session = Depends(get_db)):
-    """Регистрация нового пользователя"""
+    """Регистрация нового пользователя с отправкой кода подтверждения"""
     try:
+        # Создаем пользователя
         db_user = create_user(db, user)
-        return db_user
+        
+        # Отправляем код подтверждения
+        try:
+            send_verification_code(db, db_user)
+            return EmailConfirmationResponse(
+                message=f"Пользователь зарегистрирован! Код подтверждения отправлен на {user.email}"
+            )
+        except Exception as email_error:
+            # Если не удалось отправить email, всё равно возвращаем успешный ответ
+            return EmailConfirmationResponse(
+                message="Пользователь зарегистрирован! Используйте /auth/resend-confirmation для отправки кода."
+            )
+            
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -51,16 +68,56 @@ async def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/confirm-email")
+@router.post("/confirm-email", response_model=EmailConfirmationResponse)
 async def confirm_email(confirmation: EmailConfirmation, db: Session = Depends(get_db)):
-    """Подтверждение email (пока пустой endpoint)"""
-    # TODO: Реализовать логику подтверждения email
-    # Здесь будет:
-    # 1. Проверка кода подтверждения
-    # 2. Обновление флага is_email_confirmed у пользователя
-    # 3. Отправка уведомления об успешном подтверждении
+    """Подтверждение email по коду"""
+    try:
+        success = verify_email_code(db, confirmation.email, confirmation.code)
+        if success:
+            return EmailConfirmationResponse(
+                message="Email успешно подтвержден! Добро пожаловать в Fluxo!",
+                email_confirmed=True
+            )
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка при подтверждении email"
+        )
+
+
+@router.post("/resend-confirmation", response_model=EmailConfirmationResponse)
+async def resend_confirmation(request: EmailConfirmationRequest, db: Session = Depends(get_db)):
+    """Повторная отправка кода подтверждения"""
+    # Находим пользователя
+    user = get_user_by_email(db, request.email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь с таким email не найден"
+        )
     
-    return {"message": "Endpoint для подтверждения email (в разработке)"}
+    # Проверяем, не подтвержден ли уже email
+    if user.is_email_confirmed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email уже подтвержден"
+        )
+    
+    try:
+        # Отправляем новый код
+        send_verification_code(db, user)
+        return EmailConfirmationResponse(
+            message="Код подтверждения отправлен на ваш email"
+        )
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка при отправке кода подтверждения"
+        )
 
 
 async def get_current_user(
@@ -93,3 +150,38 @@ async def get_current_user(
 async def get_current_user_info(current_user: UserResponse = Depends(get_current_user)):
     """Получение информации о текущем пользователе"""
     return current_user
+
+
+@router.post("/change-password", response_model=PasswordChangeResponse)
+async def change_password(
+    password_data: PasswordChange,
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Смена пароля пользователя"""
+    # Получаем полную модель пользователя из БД
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден"
+        )
+    
+    try:
+        # Меняем пароль
+        change_user_password(
+            db=db,
+            user=user,
+            current_password=password_data.current_password,
+            new_password=password_data.new_password
+        )
+        
+        return PasswordChangeResponse(message="Пароль успешно изменен")
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка при смене пароля"
+        )

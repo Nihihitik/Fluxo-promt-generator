@@ -41,3 +41,5 @@ bcrypt==4.2.1
 passlib==1.7.4
 # Зависимости для аутентификации
 python-jose[cryptography]==3.3.0
+# Email сервис
+resend==0.8.0

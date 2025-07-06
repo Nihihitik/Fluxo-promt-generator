@@ -2,8 +2,21 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, prompts
+from core.database import create_tables
 
 app = FastAPI(title="Fluxo API", version="1.0.0")
+
+# Создаем таблицы при запуске приложения
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 Запуск приложения Fluxo API...")
+    try:
+        create_tables()
+        print("✅ Инициализация базы данных завершена успешно!")
+    except Exception as e:
+        print(f"❌ Ошибка инициализации базы данных: {e}")
+        # Не останавливаем приложение, чтобы можно было диагностировать проблемы
+        pass
 
 # Настройка CORS
 origins = [

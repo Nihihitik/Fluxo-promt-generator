@@ -19,6 +19,7 @@ class User(Base):
 
     # Связи
     prompt_requests = relationship("PromptRequest", back_populates="user")
+    verification_codes = relationship("EmailVerificationCode", back_populates="user")
 
     __table_args__ = (
         CheckConstraint(r"email ~ '^[^@]+@[^@]+\.[^@]+$'", name='email_format'),

@@ -25,5 +25,21 @@ def get_db():
 
 # Функция для создания таблиц
 def create_tables():
-    from models import Base
+    # Импортируем все модели чтобы они были зарегистрированы в Base.metadata
+    from models import (
+        Base, 
+        User, 
+        PromptStyle, 
+        PromptRequest, 
+        EmailVerificationCode
+    )
+    
+    print("🔧 Создание таблиц в базе данных...")
+    print(f"📋 Найдено моделей для создания: {len(Base.metadata.tables)}")
+    
+    # Выводим список таблиц которые будут созданы
+    for table_name in Base.metadata.tables.keys():
+        print(f"  - {table_name}")
+    
     Base.metadata.create_all(bind=engine)
+    print("✅ Все таблицы успешно созданы!")

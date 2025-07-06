@@ -11,9 +11,37 @@ export interface RegisterRequest {
   name: string;
 }
 
+export interface RegisterResponse {
+  message: string;
+  email_confirmed: boolean;
+}
+
 export interface AuthResponse {
   access_token: string;
   token_type: string;
+}
+
+export interface EmailConfirmationRequest {
+  email: string;
+  code: string;
+}
+
+export interface EmailConfirmationResponse {
+  message: string;
+  email_confirmed: boolean;
+}
+
+export interface ResendConfirmationRequest {
+  email: string;
+}
+
+export interface PasswordChangeRequest {
+  current_password: string;
+  new_password: string;
+}
+
+export interface PasswordChangeResponse {
+  message: string;
 }
 
 export interface User {
@@ -77,10 +105,34 @@ class ApiClient {
     });
   }
 
-  async register(userData: RegisterRequest): Promise<User> {
-    return this.request<User>('/auth/register', {
+  async register(userData: RegisterRequest): Promise<RegisterResponse> {
+    return this.request<RegisterResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(userData),
+    });
+  }
+
+  async confirmEmail(data: EmailConfirmationRequest): Promise<EmailConfirmationResponse> {
+    return this.request<EmailConfirmationResponse>('/auth/confirm-email', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async resendConfirmation(data: ResendConfirmationRequest): Promise<EmailConfirmationResponse> {
+    return this.request<EmailConfirmationResponse>('/auth/resend-confirmation', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async changePassword(data: PasswordChangeRequest, token: string): Promise<PasswordChangeResponse> {
+    return this.request<PasswordChangeResponse>('/auth/change-password', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
     });
   }
 
